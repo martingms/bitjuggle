@@ -50,13 +50,10 @@ func main() {
         fmt.Println(`net.ListenIP("ip4:icmp", %v) = %v, %v`, *srchost, c, err)
     }
 
-    //c.SetWriteDeadline(time.Now().Add(time.Second * 5))
+    // Initialize the main channel
+    channel := make(chan []byte, 16)
 
-    // Initialize the main buffer.
-    main_buffer := make([]byte, 1024 * 10)
-    main_buffer_uselist := [10]int{}
-
-    go juggle_receive(c, &main_buffer, &main_buffer_uselist)
+    go juggle_receive(c, channel)
 
     // To initialize, send each 1024B block of the file.
     file_buffer := make([]byte, 1024)
@@ -68,5 +65,8 @@ func main() {
         sendIcmpPacket(file_buffer, choose_rand_host(), c)
     }
 
-    juggle_send(c, &main_buffer, &main_buffer_uselist)
+    //os.Remove(*file)
+    fmt.Println("--> File now only exists in teh wires...")
+
+    juggle_send(c, channel)
 }
